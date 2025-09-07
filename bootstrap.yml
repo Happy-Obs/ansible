@@ -1,0 +1,44 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (debian)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Debian"
+
+  - name: install updates (CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+- hosts: all
+  become: true
+  tasks:
+    - name: create vlad user
+      tags: always
+      user:
+        name: vlad
+        groups: root
+
+    - name: add ssh key for vlad
+      tags: always
+      authorized_key:
+        user: vlad
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC/0KKBf5mJik2kS9yJaRO0/qS1E4PD/+twhiHKDAXWabdYEq/UhDWryY64Npx6+0+t+pc7jlZNkK4n77JZv6GC2DRjLOgWcaNGLO8GJZyTwmMQ8Q/oYadVmJYQjtCNxgDaS1/P9/v7srpJ9LWXjsCiS4z0GHVRsOv1w6JVdx9F3wX/uMVgs3dmMBtKfaR9CYe5s7X9JV7NbousmgYM6hMfIgOe019y1Euu537ArjYHhW4sgyoizB/r4nA2giNCzu3qQ+xB+tDJZD67R7q+jzVetwFcdKvsFvqs935Eeqfge+R4NT8vIURYhKt7PUyJhgq0YeuAKj35v7CbUgnXxwuSdHaJguZMd+VGoy8vvmRM9zN4wwNuensp4aHckgbE0I/G3duTDbodII5i5VEhBpVntFvr440I2lTpqFU3g9Yt+pRKjK+YUiQKiYJBDaQZvY7cRGGEmEDZTiPOo9t6n8i8p+Y23s7bHkz/xuruOuphy9I+Sg5LSk3vIFKbh4xPLTM= root@ansible-master"
+
+    - name: add sudoers file for vlad
+      tags: always
+      copy:
+        src: sudoer_vlad
+        dest: /etc/sudoers.d/vlad
+        owner: root
+        group: root
+        mode: 0440
+
